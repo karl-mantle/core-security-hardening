@@ -1,7 +1,17 @@
 <?php
 /**
- * Plugin Name: Core Security Hardening loader
- * Description: Loads the core-security-hardening must-use plugin from its subfolder.
+ * Plugin Name: Core Security Hardening
+ * Description: Disables various seldom used features of WordPress to improve security.
+ *              Works for standard and bedrock WordPress installs.
+ *              Each feature can be toggled under Settings > General > Hardening,
+ *              or locked from config with a CORE_SECURITY_HARDENING_<FEATURE> constant.
+ * Version: 1.1.0
+ * Author: Karl Mantle
+ * License: MIT
  */
 
-require_once __DIR__ . '/core-security-hardening/core-security-hardening.php';
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+require_once __DIR__ . '/src/plugin.php';
