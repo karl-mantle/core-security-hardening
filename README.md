@@ -54,6 +54,18 @@ define('CORE_SECURITY_HARDENING_REST_AUTH', false);
 Config::define('CORE_SECURITY_HARDENING_REST_AUTH', false);
 ```
 
+If your web server already sends security headers (for example with `add_header` in nginx), turn off the plugin's versions so they aren't sent twice:
+
+```php
+// wp-config.php
+define('CORE_SECURITY_HARDENING_SECURITY_HEADERS', false);
+define('CORE_SECURITY_HARDENING_HSTS', false);
+
+// Bedrock: config/application.php
+Config::define('CORE_SECURITY_HARDENING_SECURITY_HEADERS', false);
+Config::define('CORE_SECURITY_HARDENING_HSTS', false);
+```
+
 With the REST API locked down, some plugins (contact forms 7, WooCommerce blocks) need public routes. Allow them with a filter:
 
 ```php
