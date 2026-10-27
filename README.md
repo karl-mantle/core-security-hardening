@@ -6,18 +6,20 @@ A must-use WordPress plugin that turns off features most sites don't use. Works 
 
 Each feature can be turned off under Settings -> General -> Hardening.
 
-| Feature                        | Constant                                        | Default |
-| ------------------------------ | ----------------------------------------------- | ------- |
-| Disable XML-RPC                | `CORE_SECURITY_HARDENING_XMLRPC`                | On      |
-| Block username enumeration     | `CORE_SECURITY_HARDENING_AUTHOR_ENUMERATION`    | On      |
-| Require login for the REST API | `CORE_SECURITY_HARDENING_REST_AUTH`             | On      |
-| Disable comments               | `CORE_SECURITY_HARDENING_COMMENTS`              | On      |
-| Hide WordPress version         | `CORE_SECURITY_HARDENING_GENERATOR`             | On      |
-| Generic login errors           | `CORE_SECURITY_HARDENING_LOGIN_ERRORS`          | On      |
-| Send security headers          | `CORE_SECURITY_HARDENING_SECURITY_HEADERS`      | On      |
-| Disable the file editor        | `CORE_SECURITY_HARDENING_FILE_EDIT`             | On      |
-| Clean up the page head         | `CORE_SECURITY_HARDENING_HEAD_CLEANUP`          | On      |
-| Disable application passwords  | `CORE_SECURITY_HARDENING_APPLICATION_PASSWORDS` | Off     |
+| Feature                            | Constant                                        | Default |
+| ---------------------------------- | ----------------------------------------------- | ------- |
+| Disable XML-RPC                    | `CORE_SECURITY_HARDENING_XMLRPC`                | On      |
+| Block username enumeration         | `CORE_SECURITY_HARDENING_AUTHOR_ENUMERATION`    | On      |
+| Require login for the REST API     | `CORE_SECURITY_HARDENING_REST_AUTH`             | On      |
+| Disable comments                   | `CORE_SECURITY_HARDENING_COMMENTS`              | On      |
+| Hide version numbers               | `CORE_SECURITY_HARDENING_GENERATOR`             | On      |
+| Generic login errors               | `CORE_SECURITY_HARDENING_LOGIN_ERRORS`          | On      |
+| Send security headers              | `CORE_SECURITY_HARDENING_SECURITY_HEADERS`      | On      |
+| Send HSTS header                   | `CORE_SECURITY_HARDENING_HSTS`                  | Off     |
+| Restrict unfiltered HTML to admins | `CORE_SECURITY_HARDENING_UNFILTERED_HTML`       | On      |
+| Disable the file editor            | `CORE_SECURITY_HARDENING_FILE_EDIT`             | On      |
+| Clean up the page head             | `CORE_SECURITY_HARDENING_HEAD_CLEANUP`          | On      |
+| Disable application passwords      | `CORE_SECURITY_HARDENING_APPLICATION_PASSWORDS` | Off     |
 
 ## Installation
 

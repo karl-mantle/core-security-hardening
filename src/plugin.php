@@ -39,18 +39,28 @@ function features()
             'default' => true,
         ],
         'generator' => [
-            'label' => 'Hide WordPress version',
-            'description' => 'Removes the generator tag from the page head and feeds.',
+            'label' => 'Hide version numbers',
+            'description' => 'Removes the WordPress version from the page head, feeds and core script and style URLs, and removes the X-Powered-By header that shows the PHP version.',
             'default' => true,
         ],
         'login_errors' => [
             'label' => 'Generic login errors',
-            'description' => 'Shows the same error for a wrong username or a wrong password, so the login form doesn\'t confirm which usernames exist.',
+            'description' => 'Shows the same error for a wrong username or a wrong password, and the same "check your email" page for unknown users on the lost password form, so neither confirms which usernames exist.',
             'default' => true,
         ],
         'security_headers' => [
             'label' => 'Send security headers',
             'description' => 'Adds X-Content-Type-Options, Referrer-Policy, X-Frame-Options and Permissions-Policy headers to front-end pages.',
+            'default' => true,
+        ],
+        'hsts' => [
+            'label' => 'Send HSTS header',
+            'description' => 'Tells browsers to only use HTTPS for this site for the next year. Only sent over HTTPS. Don\'t turn this on unless the site will stay on HTTPS.',
+            'default' => false,
+        ],
+        'unfiltered_html' => [
+            'label' => 'Restrict unfiltered HTML to admins',
+            'description' => 'Editors can no longer add scripts, iframes and other unfiltered HTML to content; it\'s filtered the same way as an author\'s. Admins can still add it.',
             'default' => true,
         ],
         'file_edit' => [
@@ -280,9 +290,26 @@ if (is_enabled('comments')) {
     }, 100);
 }
 
-// remove the WordPress version from the page head and feeds
+// remove the WordPress and PHP versions from the page head, feeds, asset URLs and response headers
 if (is_enabled('generator')) {
     add_filter('the_generator', '__return_empty_string');
+
+    // swap ?ver=<wp version> on core assets for a hash, so caches still bust on upgrade
+    $hide_asset_version = function ($src) {
+        $version = get_bloginfo('version');
+        parse_str((string) wp_parse_url($src, PHP_URL_QUERY), $query);
+        if (isset($query['ver']) && $query['ver'] === $version) {
+            $src = add_query_arg('ver', substr(wp_hash($version), 0, 8), $src);
+        }
+        return $src;
+    };
+    add_filter('style_loader_src', $hide_asset_version);
+    add_filter('script_loader_src', $hide_asset_version);
+    add_filter('script_module_loader_src', $hide_asset_version);
+
+    if (!headers_sent()) {
+        header_remove('X-Powered-By');
+    }
 }
 
 // replace "unknown username" and "wrong password" errors with one generic message
@@ -297,6 +324,16 @@ if (is_enabled('login_errors')) {
         }
         return $user;
     }, 100);
+
+    // an unknown user on the lost password form gets the same "check your email" page as a real one,
+    // the same redirect core makes after sending a reset email
+    add_filter('lostpassword_errors', function ($errors, $user_data) {
+        if (!$user_data && !$errors->has_errors() && $GLOBALS['pagenow'] === 'wp-login.php') {
+            wp_safe_redirect(!empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : 'wp-login.php?checkemail=confirm');
+            exit;
+        }
+        return $errors;
+    }, 100, 2);
 }
 
 // add common security headers to front-end responses, without overriding ones already set
@@ -313,6 +350,28 @@ if (is_enabled('security_headers')) {
         }
         return $headers;
     }, 10, 2);
+}
+
+// tell browsers to only use HTTPS, on the front end, login page and admin
+if (is_enabled('hsts')) {
+    $send_hsts = function () {
+        if (is_ssl() && !headers_sent()) {
+            header('Strict-Transport-Security: max-age=31536000');
+        }
+    };
+    add_action('send_headers', $send_hsts);
+    add_action('login_init', $send_hsts);
+    add_action('admin_init', $send_hsts);
+}
+
+// only admins (users who can manage options) keep unfiltered_html; editors get filtered like authors
+if (is_enabled('unfiltered_html')) {
+    add_filter('map_meta_cap', function ($caps, $cap, $user_id) {
+        if ($cap === 'unfiltered_html' && !user_can($user_id, 'manage_options')) {
+            $caps[] = 'do_not_allow';
+        }
+        return $caps;
+    }, 10, 3);
 }
 
 // disable the theme and plugin file editors
